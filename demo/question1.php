@@ -1,5 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
+require __DIR__ . '/../vendor/autoload.php';
+
+use Sourcetoad\Assessment\Question1\ArrayPrinter;
+
 $data = [
     [
         'guest_id' => 177,
@@ -117,61 +123,8 @@ $data = [
     ],
 ];
 
-// Approach 1 — Recursion: the call stack tracks depth for us automatically.
-// Each nested array triggers a deeper call; leaves get printed.
-function displayKeyValuesRecursive(array $data, string $prefix = ''): void
-{
-    foreach ($data as $key => $value) {
-        $currentPath = $prefix === '' ? (string) $key : "{$prefix}.{$key}";
-
-        if (is_array($value)) {
-            displayKeyValuesRecursive($value, $currentPath);
-            continue;
-        }
-
-        $display = match (true) {
-            is_null($value)  => '(null)',
-            is_bool($value)  => $value ? 'true' : 'false',
-            default          => (string) $value,
-        };
-
-        echo "{$currentPath}: {$display}\n";
-    }
-}
-
-// Approach 2 — Iterative with explicit stack: avoids deep recursion limits,
-// same depth-first traversal but we manage the stack ourselves.
-function displayKeyValuesIterative(array $data, string $prefix = ''): void
-{
-    $stack = [[$data, $prefix]];
-
-    while (!empty($stack)) {
-        [$current, $parentKey] = array_pop($stack);
-
-        $keys = array_keys($current);
-        for ($i = count($keys) - 1; $i >= 0; $i--) {
-            $key = $keys[$i];
-            $value = $current[$key];
-
-            $currentKey = $parentKey === '' ? (string) $key : $parentKey . '.' . $key;
-
-            if (is_array($value)) {
-                $stack[] = [$value, $currentKey];
-            } else {
-                if (is_bool($value)) {
-                    $value = $value ? 'true' : 'false';
-                } elseif (is_null($value)) {
-                    $value = '(null)';
-                }
-
-                echo $currentKey . ': ' . $value . PHP_EOL;
-            }
-        }
-    }
-}
-
 echo "=== Approach 1: Recursive ===\n\n";
-displayKeyValuesRecursive($data,'root');
+ArrayPrinter::printRecursive($data, 'root');
 
-echo "\n=== Approach 2: Iterative (with root prefix 'guests') ===\n\n";
-displayKeyValuesIterative($data, 'root');
+echo "\n=== Approach 2: Iterative ===\n\n";
+ArrayPrinter::printIterative($data, 'root');
