@@ -1,39 +1,10 @@
 <?php
 
-function findNestedValue(array $array, string $key): mixed
-{
-    if (array_key_exists($key, $array)) {
-        return $array[$key];
-    }
+declare(strict_types=1);
 
-    foreach ($array as $value) {
-        if (is_array($value)) {
-            $found = findNestedValue($value, $key);
-            if ($found !== null) {
-                return $found;
-            }
-        }
-    }
+require __DIR__ . '/../vendor/autoload.php';
 
-    return null;
-}
-
-function sortByNestedKeys(array &$data, string|array $keys): array
-{
-    $keys = (array) $keys;
-
-    usort($data, function (array $a, array $b) use ($keys): int {
-        foreach ($keys as $key) {
-            $cmp = findNestedValue($a, $key) <=> findNestedValue($b, $key);
-            if ($cmp !== 0) {
-                return $cmp;
-            }
-        }
-        return 0;
-    });
-
-    return $data;
-}
+use Sourcetoad\Assessment\Question2\NestedSorter;
 
 $data = [
     [
@@ -152,7 +123,8 @@ $data = [
     ],
 ];
 
-sortByNestedKeys($data, ['last_name', 'account_id']);
+echo "=== Sort by 'last_name' AND 'account_id' ===\n\n";
+NestedSorter::sortByKeys($data, ['last_name', 'account_id']);
 print_r($data);
-sortByNestedKeys($data, ['last_name']);
+NestedSorter::sortByKeys($data, ['last_name']);
 print_r($data);
